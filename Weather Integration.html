@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Micello Weather Integration Example</title>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="http://maps.micello.com/webmap/v0/micellomap.js"></script> <!-- Maps -->
+	<script src="dw_xhr.js" type="text/javascript"></script> <!-- Weather Data + Webservice Call -->
+	<script type="text/javascript" src="http://maps.micello.com/plugins/Directory/Directory.js"></script>
+
+	<script type="text/javascript">
+		var apikey = "b6b73416-8094-48f9-80bd-35ad11cee059";
+		var id;
+		var area = [];
+		var weather;
+		var mapDataObject;
+		var mapControl;
+		micello.maps.init(apikey,mapInit);
+		function mapInit() {
+			//init();
+			mapControl = new micello.maps.MapControl('mapElement');
+			mapDataObject = mapControl.getMapData();
+			
+			//Directory = new micello.maps.Directory;
+			//mapControl.initMapPlugin(Directory);
+			//Directory.DirectoryInit();
+			
+			mapControl.onMapClick = onMapClick;
+			mapDataObject.loadCommunity(6552);
+			
+		}
+		function onMapClick(mx, my, clicked) {
+			if(clicked) {
+				area = mapDataObject.mxyToLatLon(mx, my);
+				getInfo();
+				weather = getData();
+			} else {
+				mapControl.hideInfoWindow();
+			}
+			document.getElementById("weather").value = weather;
+
+		}
+		function getInfo() {
+			var data = dw_encodeVars( {Latitude: area[0], Longitude: area[1]} );
+			var callback = {
+				success: function(req) {
+					console.log("Success!");
+				},
+				failure: function(req) {
+					console.log("Failure");
+				}
+			}
+			dw_makeXHRRequest('weather_call.php?' + data, callback);
+		}
+	</script>
+	<style type="text/css">
+		html, body { height: 100%; width: 100%; margin: 0; overflow:hidden;}
+		#mapElement {width:100%; height:100%;}
+	</style>
+</head>
+<body>
+	<table>
+	Weather: <input type="text" name="weather" id="weather"><br>
+	<div id="mapElement"></div>
+	</body>
+</html>
